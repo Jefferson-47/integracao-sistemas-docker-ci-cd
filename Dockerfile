@@ -1,13 +1,11 @@
-# Imagem base atualizada e enxuta (reduz superfície de ataque e CVEs)
-FROM python:3.12-slim
+# Imagem base Alpine enxuta (superfície de ataque mínima e sem CVEs de pacotes Debian)
+FROM python:3.12-alpine
 
-# Atualiza pacotes do sistema operacional para corrigir CVEs conhecidas
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    rm -rf /var/lib/apt/lists/*
+# Atualiza índices e pacotes do sistema Alpine
+RUN apk update && apk upgrade --no-cache
 
 # Cria usuário não-root para execução segura da aplicação
-RUN useradd -m appuser
+RUN adduser -D appuser
 
 WORKDIR /app
 
