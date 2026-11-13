@@ -11,9 +11,6 @@ env:
   IMAGEM_DOCKER: fastorder-api
 
 jobs:
-  # ==========================================================
-  # ESTÁGIO 1: Qualidade, Testes e Segurança de Código (SAST)
-  # ==========================================================
   qualidade-e-sast:
     name: Testes Unitários e SAST (Bandit)
     runs-on: ubuntu-24.04
@@ -41,13 +38,8 @@ jobs:
         run: pytest -v
 
       - name: Scan SAST - Análise Estática de Segurança (Bandit)
-        run: |
-          echo "Iniciando análise SAST com Bandit..."
-          bandit -r . -lll -f txt
+        run: bandit -r . -lll -f txt
 
-  # ==========================================================
-  # ESTÁGIO 2: Segurança de Dependências (SCA)
-  # ==========================================================
   seguranca-dependencias:
     name: SCA - Auditoria de Dependências (pip-audit)
     runs-on: ubuntu-24.04
@@ -66,13 +58,8 @@ jobs:
         run: pip install pip-audit
 
       - name: Auditar vulnerabilidades em requirements.txt
-        run: |
-          echo "Verificando CVEs conhecidas nas bibliotecas..."
-          pip-audit -r requirements.txt
+        run: pip-audit -r requirements.txt
 
-  # ==========================================================
-  # ESTÁGIO 3: Build Docker e Scan de Contêiner (Trivy)
-  # ==========================================================
   build-e-scan-container:
     name: Build Docker & Scan de Vulnerabilidades (Trivy)
     runs-on: ubuntu-24.04
@@ -87,16 +74,6 @@ jobs:
         run: docker build -t ${{ env.IMAGEM_DOCKER }}:${{ github.sha }} .
 
       - name: Scan de Segurança na Imagem (Trivy)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGEM_DOCKER }}:${{ github.sha }}'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-          - name: Scan de Segurança na Imagem (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ env.IMAGEM_DOCKER }}:${{ github.sha }}'
