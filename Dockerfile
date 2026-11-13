@@ -1,20 +1,26 @@
-# Usa uma imagem oficial do Python, bem leve (alpine ou slim)
-FROM python:3.9-slim
+# Imagem base atualizada e enxuta (reduz superfície de ataque e CVEs)
+FROM python:3.12-slim
 
-# Define o diretório de trabalho dentro do contêiner
+# Atualiza pacotes do sistema operacional para corrigir CVEs conhecidas
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# Cria usuário não-root para execução segura da aplicação
+RUN useradd -m appuser
+
 WORKDIR /app
 
-# Copia apenas o arquivo de dependências primeiro (otimização de cache do Docker)
+# Instala dependências Python atualizadas
 COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Instala as dependências
-RUN pip install --no-cache-dir -r requirements.txt
+# Copia o código da aplicação e define permissões
+COPY --chown=appuser:appuser . .
 
-# Copia o resto do código da aplicação para dentro do contêiner
-COPY . .
+USER appuser
 
-# Expõe a porta 5000 para o mundo exterior
 EXPOSE 5000
 
-# Comando para rodar a aplicação quando o contêiner iniciar
 CMD ["python", "app.py"]
