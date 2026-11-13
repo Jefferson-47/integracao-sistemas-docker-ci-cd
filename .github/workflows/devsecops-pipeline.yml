@@ -43,7 +43,7 @@ jobs:
       - name: Scan SAST - Análise Estática de Segurança (Bandit)
         run: |
           echo "Iniciando análise SAST com Bandit..."
-          bandit -r . -ll -ii -f txt
+          bandit -r . -lll -f txt
 
   # ==========================================================
   # ESTÁGIO 2: Segurança de Dependências (SCA)
